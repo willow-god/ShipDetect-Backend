@@ -1,0 +1,382 @@
+ATSSAssigner: {}
+AnchorGenerator: {}
+BBoxPostProcess: {}
+BaseArch: {}
+COCODataSet: {}
+CSPBepBackbone: {}
+CSPDarkNet: {}
+CSPNeXt: {}
+CSPNeXtPAFPN: {}
+CSPRepBiFPAN: {}
+CSPRepPAN: {}
+CSPResNet: {}
+CWDDistillModel: {}
+CWDFeatureLoss: {}
+CommonDataset: {}
+ConvNeXt: {}
+CustomCSPPAN: {}
+DETR: {}
+DETRHead: {}
+DETRLoss: {}
+DETRPostProcess: {}
+DETRTransformer: {}
+DINOHead: {}
+DINOLoss: {}
+DINOTransformer: {}
+DIouLoss: {}
+DarkNet: {}
+DeformableDETRHead: {}
+DeformableTransformer: {}
+DilatedEncoder: {}
+DistillModel: {}
+DistillPPYOLOELoss: {}
+DistillYOLOv3Loss: {}
+DistributionFocalLoss: {}
+ELANFPN: {}
+ELANFPNP6: {}
+ELANNet: {}
+EffiDeHead: {}
+EffiDeHead_distill_ns: {}
+EffiDeHead_fuseab: {}
+EffiDeInsHead: {}
+EfficientRep: {}
+EvalDataset:
+  anno_path: annotations/instances_val.json
+  dataset_dir: dataset/SeaShips-coco
+  image_dir: val
+  name: COCODataSet
+EvalMOTDataset: {}
+EvalMOTReader: {}
+EvalReader:
+  batch_size: 1
+  sample_transforms:
+  - Decode: {}
+  - Resize:
+      interp: 1
+      keep_ratio: true
+      target_size:
+      - 640
+      - 640
+  - Pad:
+      fill_value:
+      - 114.0
+      - 114.0
+      - 114.0
+      size:
+      - 640
+      - 640
+  - NormalizeImage:
+      mean:
+      - 0.0
+      - 0.0
+      - 0.0
+      norm_type: none
+      std:
+      - 1.0
+      - 1.0
+      - 1.0
+  - Permute: {}
+FGDDistillModel: {}
+FGDFeatureLoss: {}
+FPN: {}
+FocalLoss: {}
+FocalNet: {}
+GIoULoss: {}
+GroupDINOTransformer: {}
+HungarianMatcher: {}
+HybridEncoder: {}
+ImageFolder: {}
+IouAwareLoss: {}
+IouLoss: {}
+KnowledgeDistillationKLDivLoss: {}
+LDDistillModel: {}
+LearningRate:
+  base_lr: 0.005
+  schedulers: []
+Lite_EffiBackbone: {}
+Lite_EffiNeck: {}
+Lite_EffideHead: {}
+MGDFeatureLoss: {}
+MSDeformableAttention: {}
+MaskDINO: {}
+MaskDINOHead: {}
+MaskDINOLoss: {}
+MaskPostProcess: {}
+MatrixNMS: {}
+MimicFeatureLoss: {}
+MobileNet: {}
+MobileNetV3: {}
+MultiClassNMS:
+  keep_top_k: 300
+  nms_threshold: 0.7
+  nms_top_k: 3000
+  score_threshold: 0.001
+MultiHeadAttention: {}
+MultiScaleDeformablePoseAttention: {}
+OFA: {}
+OptimizerBuilder:
+  clip_grad_by_value: 10.0
+  optimizer:
+    momentum: 0.937
+    type: Momentum
+    use_nesterov: true
+  regularizer:
+    factor: 0.0005
+    type: L2
+PETRTransformer: {}
+PETR_DeformableDetrTransformerDecoder: {}
+PETR_DeformableTransformerDecoder: {}
+PETR_TransformerDecoder: {}
+PETR_TransformerDecoderLayer: {}
+PKDFeatureLoss: {}
+PPHGNetV2: {}
+PPYOLOE: {}
+PPYOLOEDistillModel: {}
+PPYOLOEHead: {}
+PPYOLOEInsHead: {}
+PPYOLOEWithAuxHead: {}
+PPYOLOFPN: {}
+PPYOLOPAN: {}
+PPYOLOTinyFPN: {}
+PTQ: {}
+PositionEmbedding: {}
+Pruner: {}
+PrunerQAT: {}
+QAT: {}
+QualityFocalLoss: {}
+RTDETRTransformer: {}
+RTMDet: {}
+RTMDetHead: {}
+RTMDetInsHead: {}
+RepBiFPAN: {}
+RepPAN: {}
+Res5Head: {}
+ResNet: {}
+SIoULoss: {}
+SSODFCOSLoss: {}
+SSODPPYOLOELoss: {}
+SemiCOCODataSet: {}
+SemiTrainReader: {}
+SimOTAAssigner: {}
+SimpleConvHead: {}
+SimpleFeaturePyramid: {}
+SlicedCOCODataSet: {}
+SmoothL1Loss: {}
+SwinTransformer: {}
+TaskAlignedAssigner:
+  alpha: 0.5
+  beta: 6.0
+  topk: 10
+TaskAlignedAssigner_CR: {}
+TestDataset:
+  anno_path: annotations/instances_test.json
+  dataset_dir: dataset/SeaShips-coco
+  image_dir: test
+  name: ImageFolder
+TestMOTDataset: {}
+TestMOTReader: {}
+TestReader:
+  batch_size: 1
+  fuse_normalize: false
+  inputs_def:
+    image_shape:
+    - 3
+    - 640
+    - 640
+  sample_transforms:
+  - Decode: {}
+  - Resize:
+      interp: 1
+      keep_ratio: true
+      target_size:
+      - 640
+      - 640
+  - Pad:
+      fill_value:
+      - 114.0
+      - 114.0
+      - 114.0
+      size:
+      - 640
+      - 640
+  - NormalizeImage:
+      mean:
+      - 0.0
+      - 0.0
+      - 0.0
+      norm_type: none
+      std:
+      - 1.0
+      - 1.0
+      - 1.0
+  - Permute: {}
+TrainDataset:
+  anno_path: annotations/instances_train.json
+  data_fields:
+  - image
+  - gt_bbox
+  - gt_class
+  - is_crowd
+  dataset_dir: dataset/SeaShips-coco
+  image_dir: train
+  name: COCODataSet
+TrainReader:
+  batch_size: 8
+  batch_transforms:
+  - NormalizeImage:
+      mean:
+      - 0.0
+      - 0.0
+      - 0.0
+      norm_type: none
+      std:
+      - 1.0
+      - 1.0
+      - 1.0
+  - Permute: {}
+  - PadGT: {}
+  collate_batch: true
+  drop_last: false
+  mosaic_epoch: 490
+  sample_transforms:
+  - Decode: {}
+  - MosaicPerspective:
+      boxes_normed: false
+      copy_paste_prob: 0.1
+      mixup_prob: 0.1
+      mosaic_prob: 1.0
+      scale: 0.9
+      target_size:
+      - 640
+      - 640
+  - RandomHSV:
+      hgain: 0.015
+      sgain: 0.7
+      vgain: 0.4
+  - RandomFlip: {}
+  shuffle: true
+  use_shared_memory: true
+TransformerEncoder: {}
+TransformerEncoderLayer: {}
+TransformerLayer: {}
+UniformAssigner: {}
+UnstructuredPruner: {}
+VOCDataSet: {}
+VarifocalLoss: {}
+VisionTransformer: {}
+VisionTransformer2D: {}
+Weighted_FocalLoss: {}
+YOLOBox: {}
+YOLOCSPPAN: {}
+YOLOF: {}
+YOLOFFeat: {}
+YOLOFHead: {}
+YOLOX: {}
+YOLOXHead: {}
+YOLOv10: {}
+YOLOv10CSPDarkNet: {}
+YOLOv10CSPPAN: {}
+YOLOv10Head: {}
+YOLOv3: {}
+YOLOv3FPN: {}
+YOLOv3Head: {}
+YOLOv3Loss: {}
+YOLOv5: {}
+YOLOv5Head: {}
+YOLOv5InsHead: {}
+YOLOv5InsLoss: {}
+YOLOv5Loss: {}
+YOLOv6: {}
+YOLOv7: {}
+YOLOv7Head: {}
+YOLOv7Loss: {}
+YOLOv7uHead: {}
+YOLOv8:
+  backbone: YOLOv8CSPDarkNet
+  neck: YOLOv8CSPPAN
+  post_process: null
+  yolo_head: YOLOv8Head
+YOLOv8CSPDarkNet:
+  arch: P5
+  last2_stage_ch: 512
+  last_stage_ch: 768
+  return_idx:
+  - 2
+  - 3
+  - 4
+YOLOv8CSPPAN: {}
+YOLOv8CSPPANP6: {}
+YOLOv8Head:
+  assigner:
+    alpha: 0.5
+    beta: 6.0
+    name: TaskAlignedAssigner
+    topk: 10
+  fpn_strides:
+  - 8
+  - 16
+  - 32
+  loss_weight:
+    class: 0.5
+    dfl: 1.5
+    iou: 7.5
+  nms:
+    keep_top_k: 300
+    name: MultiClassNMS
+    nms_threshold: 0.7
+    nms_top_k: 3000
+    score_threshold: 0.001
+YOLOv8InsHead: {}
+act: silu
+architecture: YOLOv8
+combine_method: nms
+depth_mult: 0.67
+draw_threshold: 0.2
+ema_decay: 0.9999
+ema_decay_type: exponential
+epoch: 50
+export:
+  benchmark: false
+  fuse_conv_bn: false
+  nms: true
+  post_process: true
+filename: yolov8_m_500e_coco_mydataset
+find_unused_parameters: true
+infer_dir: null
+infer_img: ./dataset/MyDataSet-coco/train/000002.jpg
+input_height: 640
+input_size:
+- 640
+- 640
+input_width: 640
+log_iter: 50
+match_metric: ios
+match_threshold: 0.6
+metric: COCO
+mosaic_epoch: 490
+norm_type: sync_bn
+num_classes: 6
+output_dir: output
+overlap_ratio:
+- 0.25
+- 0.25
+print_flops: false
+print_params: false
+save_dir: output
+save_results: false
+slice_infer: false
+slice_size:
+- 640
+- 640
+snapshot_epoch: 5
+use_ema: true
+use_gpu: true
+use_mlu: false
+use_npu: false
+use_vdl: false
+use_xpu: false
+vdl_log_dir: vdl_log_dir/image
+visualize: true
+weights: output\yolov8_m_500e_coco_mydataset\model_final.pdparams
+width_mult: 0.75
+worker_num: 4
