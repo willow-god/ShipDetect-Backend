@@ -172,3 +172,14 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# 忽略模型
+*.model
+*.ckpt
+*.pth
+*.pt
+*.onnx
+*.pdparams
+
+# 忽略输出文件
+output/

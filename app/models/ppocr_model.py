@@ -65,8 +65,14 @@ class PPOCRModel:
         :param conf_threshold: 置信度阈值
         :return: 文本内容列表及对应置信度
         """
-        result = self.ocr.ocr(img_path, det=False, rec=True, cls=True)[0]
-        texts = [(line[0], line[1]) for line in result if line[1] >= conf_threshold]
+        result = self.ocr.ocr(img_path, det=False, cls=False)
+        texts = []
+        for idx in range(len(result)):
+            res = result[idx]
+            for line in res:
+                if line[1] >= conf_threshold:
+                    texts.append(line)
+    
         return texts
 
     def detect_and_recognize(self, img_path, conf_threshold=0.5, visualize=False, save_results=None, font_path='static/simfang.ttf'):
@@ -79,29 +85,37 @@ class PPOCRModel:
         :param font_path: 字体路径
         :return: 识别结果
         """
-        result = self.ocr.ocr(img_path, cls=True, det=True)[0]
-        image = Image.open(img_path).convert('RGB')
+        result = self.ocr.ocr(img_path, cls=True, det=True)
+        bboxes = []
+        for idx in range(len(result)):
+            res = result[idx]
+            for line in res:
+                if line[1][1] >= conf_threshold:
+                    boxes.append(line)
+
+                    
+        # image = Image.open(img_path).convert('RGB')
         
-        boxes, texts, scores = [], [], []
-        for line in result:
-            if line[1][1] >= conf_threshold:
-                boxes.append(line[0])
-                texts.append(line[1][0])
-                scores.append(line[1][1])
+        # boxes, texts, scores = [], [], []
+        # for line in result:
+        #     if line[1][1] >= conf_threshold:
+        #         boxes.append(line[0])
+        #         texts.append(line[1][0])
+        #         scores.append(line[1][1])
         
-        self.results = texts  # 存储识别文本
+        # self.results = texts  # 存储识别文本
         
-        if visualize:
-            im_show = draw_ocr(image, boxes, texts, scores, font_path=font_path)
-            im_show = Image.fromarray(im_show)
-            im_show.show()
+        # if visualize:
+        #     im_show = draw_ocr(image, boxes, texts, scores, font_path=font_path)
+        #     im_show = Image.fromarray(im_show)
+        #     im_show.show()
         
-        if save_results:
-            with open(save_results, 'w', encoding='utf-8') as f:
-                for text, score in zip(texts, scores):
-                    f.write(f'{text}: {score}\n')
+        # if save_results:
+        #     with open(save_results, 'w', encoding='utf-8') as f:
+        #         for text, score in zip(texts, scores):
+        #             f.write(f'{text}: {score}\n')
         
-        return texts, scores
+        return bboxes
 
     def fuzzy_match(self, keyword):
         """
