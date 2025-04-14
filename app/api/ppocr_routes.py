@@ -55,5 +55,6 @@ async def recognize_text_from_image(file: UploadFile = File(..., description="Th
 def simulate_ppocr(image_path):
     return {
         'ship_id': f"鄂A{random.randint(1000,9999)}",
-        'ship_id_bbox': [10, 10, 120, 40]
+        'ship_id_bbox': [10, 10, 120, 40],
+        'confidence': 0.95
     }

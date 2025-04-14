@@ -142,24 +142,25 @@ async def process_video(video_id: int, video_url: str):
             os.makedirs(os.path.dirname(region_path), exist_ok=True)
             cv2.imwrite(region_path, region)
 
-            print(f"开始对帧 {frame_index} 的目标进行 OCR")
-            ocr_results = simulate_ppocr(region_path)
-            ship_id = ocr_results['ship_id']
-            ship_id_bbox = ocr_results['ship_id_bbox']
+            if(True):
+                print(f"开始对帧 {frame_index} 的目标进行 OCR")
+                ocr_results = simulate_ppocr(region_path)
+                ship_id = ocr_results['ship_id']
+                ship_id_bbox = ocr_results['ship_id_bbox']
 
-            # 上传图床
-            ship_id_url = simulate_upload_to_lsky(region_path)
+                # 上传图床
+                ship_id_url = simulate_upload_to_lsky(region_path)
 
-            # 保存数据库
-            save_result_to_db(
-                video_id=video_id,
-                ship_id=ship_id,
-                bbox=str(ship_id_bbox),
-                region_url=ship_id_url,
-                timestamp=timestamp_str,
-                category=det['category_id'],
-                confidence=det['confidence']
-            )
+                # 保存数据库
+                save_result_to_db(
+                    video_id=video_id,
+                    ship_id=ship_id,
+                    bbox=str(ship_id_bbox),
+                    region_url=ship_id_url,
+                    timestamp=timestamp_str,
+                    category=det['category_id'],
+                    confidence=det['confidence']
+                )
 
             print(f"帧 {frame_index} OCR 完成，识别到船牌号: {ship_id}")
 
@@ -246,7 +247,7 @@ async def upload_video(file: UploadFile = File(...), video_name: str = Form(...)
     cursor = conn.cursor()
     relative_path = save_path
     cursor.execute("INSERT INTO videos (video_name, video_url) VALUES (%s, %s)", 
-                  (video_name, relative_path))
+                  (video_name, filename))
     conn.commit()
     video_id = cursor.lastrowid
     cursor.close()
@@ -304,3 +305,20 @@ async def get_all_videos():
     conn.close()
 
     return videos
+
+# 实现接口，获取所有视频的 ID 列表，格式为 number[]
+@router.get("/get_video_ids", response_model=List[int])
+async def get_video_ids():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # 查询所有视频 ID
+    cursor.execute("SELECT id FROM videos")
+    rows = cursor.fetchall()
+
+    video_ids = [row[0] for row in rows]
+
+    cursor.close()
+    conn.close()
+
+    return video_ids
