@@ -6,8 +6,8 @@ app = FastAPI()
 
 # 注册路由
 app.include_router(sample_routes.router, prefix="/api/sample", tags=["Sample"])
-app.include_router(yolov8_routes.router, prefix="/api/yolov8", tags=["YOLOv8"])
-app.include_router(ppocr_routes.router, prefix="/api/ppocr", tags=["PP-OCR"])
+# app.include_router(yolov8_routes.router, prefix="/api/yolov8", tags=["YOLOv8"])
+# app.include_router(ppocr_routes.router, prefix="/api/ppocr", tags=["PP-OCR"])
 app.include_router(video_routes.router, prefix="/api/video", tags=["Video Processing"])
 app.include_router(result_routes.router, prefix="/api/result", tags=["Result"])
 app.include_router(sample_routes.router, prefix="/api/picture", tags=["Picture Processing"])

@@ -10,17 +10,17 @@ image_path = os.path.join(os.path.dirname(current_file_path), 'resources/images/
 # test yolov8_model.py
 model = YOLOv8Model(weights_path=weights_path, config_path=default_config_path, use_gpu=True, threshold=0.3)
 
-results1 = model.predict(image_path, threshold=0.45, save_result=True)
+results1 = model.predict(image_path, threshold=0.2, save_result=True)
 print("Results:", results1)
 
 import cv2
 img_np = cv2.imread(image_path)
-results2 = model.predict_image(img_np, threshold=0.45, save_result=True)
+results2 = model.predict_image(img_np, threshold=0.2, save_result=True)
 print("Results:", results2)
 
 from PIL import Image
 img_pil = Image.open(image_path)
-results3 = model.predict_image(img_pil, threshold=0.45, save_result=True)
+results3 = model.predict_image(img_pil, threshold=0.2, save_result=True)
 print("Results:", results3)
 
 # test ppocr_model.py

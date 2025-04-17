@@ -3,15 +3,14 @@ import os
 import tempfile
 import cv2
 import json
-import uuid
 import numpy as np
 
 from fastapi import APIRouter, File, UploadFile
 from fastapi.responses import StreamingResponse
 
-from app.api.yolov8_routes import simulate_yolov8_detect
-from app.api.ppocr_routes import simulate_ppocr
-from app.utils.base64 import encode_ndarray_to_base64
+from app.api.yolov8_routes import yolov8_detect
+from app.api.ppocr_routes import ppocr_v4
+from app.utils.pic2base64 import encode_ndarray_to_base64
 
 router = APIRouter()
 
@@ -21,20 +20,33 @@ async def detect_image(image: UploadFile = File(...)):
     np_arr = np.frombuffer(contents, np.uint8)
     img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
-    detections = simulate_yolov8_detect(img)
+    detections = yolov8_detect(img)
+    print(f"检测到 {len(detections)} 个船舶")
     results = []
 
     for idx, det in enumerate(detections, start=1):
+        print(f"船舶 {idx}: {det['category']}")
+        
         bbox = list(map(int, det["bbox"]))  # [x1, y1, x2, y2]
         x1, y1, x2, y2 = bbox
+        # ---------- 处理船舶 bbox ----------
+        print(f"船舶 bbox: {bbox}")
+        if x1 < 0: x1 = 0
+        if y1 < 0: y1 = 0
+        if x2 > img.shape[1]: x2 = img.shape[1]
+        if y2 > img.shape[0]: y2 = img.shape[0]
+        if x1 >= x2 or y1 >= y2:
+            print(f"Invalid bbox: {bbox}")
+            continue
         region = img[y1:y2, x1:x2].copy()  # 裁剪区域图像
+        print(f"裁剪区域大小: {region.shape}")
 
         # ---------- 绘制船舶 bbox 在原图上 ----------
         img_with_ship_box = img.copy()
         cv2.rectangle(img_with_ship_box, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
         # ---------- 船号识别 ----------
-        ocr_result = simulate_ppocr(region)
+        ocr_result = ppocr_v4(region)
         ship_number = ocr_result.get("ship_id", "")
         number_bbox = ocr_result.get("ship_id_bbox", [])  # 相对于 region 的 bbox
 
@@ -94,7 +106,7 @@ async def stream_video_detect(video: UploadFile = File(...)):
                     scale = max_width / frame.shape[1]
                     frame = cv2.resize(frame, None, fx=scale, fy=scale)
 
-                detections = simulate_yolov8_detect(frame)
+                detections = yolov8_detect(frame)
                 frame_drawn = frame.copy()
                 result_list = []
 
@@ -104,7 +116,7 @@ async def stream_video_detect(video: UploadFile = File(...)):
                     ship_category = det["category"]
                     ship_confidence = round(float(det.get("score", 0.9)), 3)
 
-                    ocr_result = simulate_ppocr(ship_crop)
+                    ocr_result = ppocr_v4(ship_crop)
                     ship_id = ocr_result.get("ship_id", "")
                     ship_id_bbox_crop = ocr_result.get("ship_id_bbox", [])
                     ship_id_conf = round(float(ocr_result.get("ship_id_score", 0.85)), 3)

@@ -11,9 +11,9 @@ import asyncio
 from dotenv import load_dotenv
 import requests
 from .result_routes import save_result_to_db
-from .yolov8_routes import simulate_yolov8_detect
-from .ppocr_routes import simulate_ppocr
-from app.utils.lsky_pro import simulate_upload_to_lsky
+from .yolov8_routes import simulate_yolov8_detect, yolov8_detect
+from .ppocr_routes import simulate_ppocr, ppocr_v4
+from app.utils.lsky_pro import upload_to_lsky
 import tempfile
 import uuid
 import cv2
@@ -83,73 +83,73 @@ def status_to_text(status: int) -> str:
         return "处理失败"
     return "处理中"
 
-# 模拟视频处理
+# 保存处理结果到数据库
 async def process_video(video_id: int, video_url: str):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # 更新视频状态为处理中
-    cursor.execute("UPDATE videos SET status = %s WHERE id = %s", (STATUS_PROCESSING, video_id))
-    print(f"视频 {video_id} 状态更新为【处理中】")
-    conn.commit()
+    try:
+        # 更新视频状态为处理中
+        cursor.execute("UPDATE videos SET status = %s WHERE id = %s", (STATUS_PROCESSING, video_id))
+        print(f"视频 {video_id} 状态更新为【处理中】")
+        conn.commit()
 
-    # 下载或读取视频
-    if video_url.startswith("http"):
-        video_path = tempfile.mktemp(suffix=".mp4")
-        with open(video_path, 'wb') as f:
-            f.write(requests.get(video_url).content)
-    else:
-        video_path = video_url
+        # 下载或读取视频
+        if video_url.startswith("http"):
+            video_path = tempfile.mktemp(suffix=".mp4")
+            with open(video_path, 'wb') as f:
+                f.write(requests.get(video_url).content)
+        else:
+            video_path = video_url
 
-    if not os.path.exists(video_path):
-        raise FileNotFoundError(f"视频文件不存在: {video_path}")
+        if not os.path.exists(video_path):
+            raise FileNotFoundError(f"视频文件不存在: {video_path}")
 
-    # 清空输出帧目录
-    shutil.rmtree("output/frames", ignore_errors=True)
+        # 清空输出帧目录
+        shutil.rmtree("output/frames", ignore_errors=True)
 
-    cap = cv2.VideoCapture(video_path)
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    if not fps or fps == 0:
-        fps = 30  # 默认帧率
-        print(f"视频 {video_id} FPS 获取失败，使用默认值: {fps}")
+        cap = cv2.VideoCapture(video_path)
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        if not fps or fps == 0:
+            fps = 30  # 默认帧率
+            print(f"视频 {video_id} FPS 获取失败，使用默认值: {fps}")
 
-    frame_interval = int(fps * 3)  # 每3秒抽一帧
-    print(f"视频 {video_id} FPS: {fps}，每 {frame_interval} 帧抽一帧")
+        frame_interval = int(fps * 3)  # 每3秒抽一帧
+        print(f"视频 {video_id} FPS: {fps}，每 {frame_interval} 帧抽一帧")
 
-    frame_index = 0
-    print(f"视频 {video_id} 开始抽帧处理")
+        frame_index = 0
+        print(f"视频 {video_id} 开始抽帧处理")
 
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            print(f"视频 {video_id} 处理完成")
-            break
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                print(f"视频 {video_id} 处理完成")
+                break
 
-        if frame_index % frame_interval != 0:
-            frame_index += 1
-            continue
+            if frame_index % frame_interval != 0:
+                frame_index += 1
+                continue
 
-        timestamp = frame_index / fps
-        timestamp_str = f"{int(timestamp // 60):02d}:{int(timestamp % 60):02d}"
+            timestamp = frame_index / fps
+            timestamp_str = f"{int(timestamp // 60):02d}:{int(timestamp % 60):02d}"
 
-        yolov8_results = simulate_yolov8_detect(frame)  # 模拟检测
-        print(f"帧 {frame_index} 检测到 {len(yolov8_results)} 个目标")
+            yolov8_results = yolov8_detect(frame)  # 模拟检测
+            print(f"帧 {frame_index} 检测到 {len(yolov8_results)} 个目标")
 
-        for det in yolov8_results:
-            x1, y1, x2, y2 = det['bbox']
-            region = frame[y1:y2, x1:x2]
-            region_path = f"output/frames/{uuid.uuid4().hex}.jpg"
-            os.makedirs(os.path.dirname(region_path), exist_ok=True)
-            cv2.imwrite(region_path, region)
+            for det in yolov8_results:
+                x1, y1, x2, y2 = det['bbox']
+                region = frame[y1:y2, x1:x2]
+                region_path = f"output/frames/{uuid.uuid4().hex}.jpg"
+                os.makedirs(os.path.dirname(region_path), exist_ok=True)
+                cv2.imwrite(region_path, region)
 
-            if(True):
                 print(f"开始对帧 {frame_index} 的目标进行 OCR")
-                ocr_results = simulate_ppocr(region_path)
+                ocr_results = ppocr_v4(region_path)
                 ship_id = ocr_results['ship_id']
                 ship_id_bbox = ocr_results['ship_id_bbox']
 
                 # 上传图床
-                ship_id_url = simulate_upload_to_lsky(region_path)
+                ship_id_url = upload_to_lsky(region_path)
 
                 # 保存数据库
                 save_result_to_db(
@@ -162,16 +162,23 @@ async def process_video(video_id: int, video_url: str):
                     confidence=det['confidence']
                 )
 
-            print(f"帧 {frame_index} OCR 完成，识别到船牌号: {ship_id}")
+                print(f"帧 {frame_index} OCR 完成，识别到船牌号: {ship_id}")
 
-        frame_index += 1  # 别忘了增加帧数
+            frame_index += 1
 
-    # 更新视频状态为完成
-    cursor.execute("UPDATE videos SET status = %s WHERE id = %s", (STATUS_COMPLETED, video_id))
-    conn.commit()
+        # 更新视频状态为完成
+        cursor.execute("UPDATE videos SET status = %s WHERE id = %s", (STATUS_COMPLETED, video_id))
+        conn.commit()
 
-    cursor.close()
-    conn.close()
+    except Exception as e:
+        print(f"视频 {video_id} 处理失败，错误：{str(e)}")
+        cursor.execute("UPDATE videos SET status = %s WHERE id = %s", (STATUS_FAILED, video_id))
+        conn.commit()
+
+    finally:
+        cursor.close()
+        conn.close()
+
 
 # 新增：将 process_video 包装成一个普通的同步函数
 def run_process_video(video_id, video_url):
